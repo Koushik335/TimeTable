@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime, time, timezone, timedelta
+import textwrap
 
 # Page config
 st.set_page_config(page_title="VIT Schedule", page_icon="⚡", layout="centered")
@@ -71,16 +72,16 @@ st.markdown("""
     }
 
     .time-badge {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         color: #94a3b8;
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         margin-bottom: 8px;
     }
     .status-tag {
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 700;
         padding: 2px 8px;
         border-radius: 10px;
@@ -142,7 +143,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Timetable dataset
+# Timetable data
 schedule = {
     "MON": [
         {"start": time(14, 55), "end": time(15, 45), "time": "02:55 PM - 03:45 PM", "name": "Applied Chemistry", "type": "ETH", "slot": "F2+TF2", "venue": "AB4-320"},
@@ -173,7 +174,7 @@ schedule = {
     ]
 }
 
-# Standard Indian Standard Time (UTC+5:30) without external libraries
+# Current IST Time
 ist_zone = timezone(timedelta(hours=5, minutes=30))
 now_ist = datetime.now(ist_zone)
 current_time = now_ist.time()
@@ -181,7 +182,7 @@ weekday_names = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 today_str = weekday_names[now_ist.weekday()]
 
 # Top Profile Bar
-st.markdown(f"""
+st.markdown("""
 <div class="top-bar">
     <div>
         <div style="font-size: 11px; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase;">VIT Timetable</div>
@@ -213,18 +214,17 @@ for i, day in enumerate(days):
                     extra_class = "card-next"
                     status_tag = '<span class="status-tag status-upcoming">Next Class</span>'
                     found_next = True
-            
-            st.markdown(f"""
-            <div class="class-card {extra_class}">
-                <div class="time-badge">
-                    <span>⏱ {item['time']}</span>
-                    {status_tag}
-                </div>
-                <div class="course-title">{item['name']}</div>
-                <div class="chip-container">
-                    <span class="chip chip-venue">📍 {item['venue']}</span>
-                    <span class="chip">🏷 {item['slot']}</span>
-                    <span class="chip">📘 {item['type']}</span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+
+            # Use textwrap.dedent to completely remove indentation before passing to markdown
+            card_html = textwrap.dedent(f"""
+<div class="class-card {extra_class}">
+<div class="time-badge"><span>⏱ {item['time']}</span>{status_tag}</div>
+<div class="course-title">{item['name']}</div>
+<div class="chip-container">
+<span class="chip chip-venue">📍 {item['venue']}</span>
+<span class="chip">🏷 {item['slot']}</span>
+<span class="chip">📘 {item['type']}</span>
+</div>
+</div>
+""")
+            st.markdown(card_html, unsafe_allow_html=True)
