@@ -1,16 +1,14 @@
 import streamlit as st
-from datetime import datetime, time
-import pytz
+from datetime import datetime, time, timezone, timedelta
 
-# Configure layout
+# Page config
 st.set_page_config(page_title="VIT Schedule", page_icon="⚡", layout="centered")
 
-# --- CUSTOM CSS (STUNNING MODERN GLASSMORPHISM UI) ---
+# --- MODERN GLASSMORPHISM STYLING ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-    /* Global styling */
     * {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
@@ -19,7 +17,6 @@ st.markdown("""
         color: #f8fafc;
     }
 
-    /* Hide standard Streamlit header & margins */
     header, footer { visibility: hidden !important; }
     .block-container {
         padding-top: 1.5rem !important;
@@ -27,7 +24,6 @@ st.markdown("""
         max-width: 520px !important;
     }
 
-    /* Top profile bar */
     .top-bar {
         display: flex;
         justify-content: space-between;
@@ -50,9 +46,7 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
     }
 
-    /* Modern Timetable Cards */
     .class-card {
-        position: relative;
         background: rgba(255, 255, 255, 0.03);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.07);
@@ -67,7 +61,6 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
-    /* Status Glows */
     .card-active {
         border-left: 4px solid #10b981 !important;
         background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
@@ -105,7 +98,6 @@ st.markdown("""
         line-height: 1.35;
     }
 
-    /* Venue & Slot chips */
     .chip-container {
         display: flex;
         gap: 8px;
@@ -126,7 +118,6 @@ st.markdown("""
         border-color: rgba(99, 102, 241, 0.2);
     }
 
-    /* Style Streamlit Tabs to look like floating pills */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: rgba(255, 255, 255, 0.03);
@@ -151,7 +142,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- TIMETABLE DATA WITH PARSED TIME BOUNDS ---
+# Timetable dataset
 schedule = {
     "MON": [
         {"start": time(14, 55), "end": time(15, 45), "time": "02:55 PM - 03:45 PM", "name": "Applied Chemistry", "type": "ETH", "slot": "F2+TF2", "venue": "AB4-320"},
@@ -182,14 +173,14 @@ schedule = {
     ]
 }
 
-# --- IST TIME COMPUTATION ---
-ist = pytz.timezone('Asia/Kolkata')
-now = datetime.now(ist)
-current_time = now.time()
+# Standard Indian Standard Time (UTC+5:30) without external libraries
+ist_zone = timezone(timedelta(hours=5, minutes=30))
+now_ist = datetime.now(ist_zone)
+current_time = now_ist.time()
 weekday_names = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-today_str = weekday_names[now.weekday()]
+today_str = weekday_names[now_ist.weekday()]
 
-# --- HEADER BAR ---
+# Top Profile Bar
 st.markdown(f"""
 <div class="top-bar">
     <div>
@@ -200,7 +191,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- DAY TABS ---
+# Tabs
 days = ["MON", "TUE", "WED", "THU", "FRI"]
 tabs = st.tabs([f" {d} " for d in days])
 
@@ -214,7 +205,6 @@ for i, day in enumerate(days):
             extra_class = ""
             status_tag = ""
             
-            # Highlight logic for today
             if is_today:
                 if item["start"] <= current_time <= item["end"]:
                     extra_class = "card-active"
